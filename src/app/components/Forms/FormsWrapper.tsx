@@ -4,14 +4,38 @@ import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import FormsTab from './FormsTab';
 import SignInForm from './SignInForm';
 import SignUpForm from './SignUpForm';
-import { SignInFormValues, SignUpFormValues } from './Forms.types';
+import type { SignInFormValues, SignUpFormValues } from './Forms.types';
 import { Box, Paper, Typography } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { fetchAPI } from '../../../utils/api';
 
 const FormsWrapper: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSignIn = (values: SignInFormValues) => {
-    console.log('Sign In:', values);
+  const handleSignIn = async (values: SignInFormValues) => {
+    try {
+      const data = await fetchAPI('/auth/signin', 'POST', {
+        email: values.email,
+        password: values.password,
+      });
+      document.cookie = `token=${data.token}; path=/`;
+      document.cookie = `userId=${data.user._id}; path=/`;
+      document.cookie = `role=${data.user.role}; path=/`;
+      router.push('/appointment');
+    } catch (err: unknown) {
+      let errorMessage: string;
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        if (err.message === 'Failed to fetch') {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+      } else {
+        errorMessage = 'An unexpected error occurred. Please try again.';
+      }
+      setError(errorMessage);
+    }
   };
 
   const handleSignUp = (values: SignUpFormValues) => {
@@ -74,6 +98,11 @@ const FormsWrapper: React.FC = () => {
             Dentora Pro
           </Typography>
         </Box>
+        {error && (
+          <Typography color="error" sx={{ mb: 2 }}>
+            {error}
+          </Typography>
+        )}
         <FormsTab
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
