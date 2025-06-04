@@ -6,7 +6,7 @@ import { SignInSchema } from './ValidationSchemas';
 import { Box, Button } from '@mui/material';
 import { CustomTextField } from './CustomTextField';
 
-const SignInForm: React.FC<SignInFormProps> = ({ onSubmit }) => {
+const SignInForm: React.FC<SignInFormProps> = ({ onSubmit, isSubmitting }) => {
   const initialValues: SignInFormValues = {
     email: '',
     password: '',
@@ -40,6 +40,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSubmit }) => {
             type="submit"
             variant="contained"
             fullWidth
+            disabled={isSubmitting}
             sx={{
               py: 2,
               mt: 2,
@@ -49,7 +50,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSubmit }) => {
               },
             }}
           >
-            Sign In
+            {isSubmitting ? 'Signing In...' : 'Sign In'}
           </Button>
         </Box>
       </Form>

@@ -13,6 +13,7 @@ export type SignUpFormValues = {
 
 export interface SignInFormProps {
     onSubmit: (values: SignInFormValues) => void;
+    isSubmitting: boolean;
 }
 
 export interface SignUpFormProps {
