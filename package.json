@@ -11,15 +11,21 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@date-io/date-fns": "^3.2.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@hookform/resolvers": "^5.0.1",
     "@mui/icons-material": "^7.1.0",
-    "@mui/material": "^7.1.0",
+    "@mui/material": "^7.1.1",
     "@mui/styled-engine-sc": "^7.1.0",
+    "@mui/x-date-pickers": "^8.5.0",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "formik": "^2.4.6",
     "next": "15.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.56.4",
     "styled-components": "^6.1.18",
     "yup": "^1.6.1"
   },
