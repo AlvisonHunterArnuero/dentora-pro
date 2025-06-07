@@ -1,17 +1,18 @@
 "use client";
 
-import { TextField, Button, Box, Grid } from "@mui/material";
+import { useRouter } from "next/navigation";
+import { Box, Grid, TextField, Button } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { appointmentSchema } from "./AppointmentSchema";
-import { useRouter } from "next/navigation";
+import dayjs, { Dayjs } from "dayjs";
 
 interface FormData {
   title: string;
-  date: Date;
-  startTime: Date;
-  endTime: Date;
+  date: Dayjs;
+  startTime: Dayjs;
+  endTime: Dayjs;
   description?: string;
 }
 
@@ -26,9 +27,9 @@ const AppointmentForm = () => {
     resolver: yupResolver(appointmentSchema),
     defaultValues: {
       title: "",
-      date: new Date(),
-      startTime: new Date(),
-      endTime: new Date(),
+      date: dayjs(),
+      startTime: dayjs(),
+      endTime: dayjs(),
       description: "",
     },
   });
@@ -42,22 +43,22 @@ const AppointmentForm = () => {
     };
 
     try {
-      const res = await fetch(`${BASE_URL}/appointments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/appointments`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
-      if (res.ok) {
-        alert("Appointment created!");
-        router.push("/appointments");
-      } else {
-        const error = await res.json();
-        alert(error.message || "Error creating appointment");
-      }
+      if (!res.ok) throw new Error("Error creating appointment");
+
+      alert("Appointment created!");
+      router.push("/appointments");
     } catch (err) {
       console.error(err);
-      alert("An error occurred while creating the appointment.");
+      alert("Failed to create appointment.");
     }
   };
 
@@ -87,9 +88,10 @@ const AppointmentForm = () => {
               control={control}
               render={({ field }) => (
                 <DatePicker
+                  {...field}
                   label="Select the date"
-                  value={dayjs(field.value)}
-                  onChange={(newValue) => field.onChange(newValue?.toDate())}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               )}
             />
@@ -104,9 +106,10 @@ const AppointmentForm = () => {
               control={control}
               render={({ field }) => (
                 <TimePicker
-                  label="Enter your Start Time"
-                  value={dayjs(field.value)}
-                  onChange={(newValue) => field.onChange(newValue?.toDate())}
+                  {...field}
+                  label="Start Time"
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               )}
             />
@@ -121,9 +124,10 @@ const AppointmentForm = () => {
               control={control}
               render={({ field }) => (
                 <TimePicker
-                  label="Enter your End Time"
-                  value={dayjs(field.value)}
-                  onChange={(newValue) => field.onChange(newValue?.toDate())}
+                  {...field}
+                  label="End Time"
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               )}
             />
@@ -139,7 +143,7 @@ const AppointmentForm = () => {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Enter your description"
+                  label="Description"
                   multiline
                   rows={3}
                   fullWidth
@@ -153,12 +157,12 @@ const AppointmentForm = () => {
           <Grid item xs={12} className="flex justify-between">
             <Button
               variant="outlined"
-              onClick={() => router.back()}
               color="secondary"
+              onClick={() => router.back()}
             >
-              Go Back
+              Cancel
             </Button>
-            <Button variant="contained" type="submit" color="primary">
+            <Button variant="contained" color="primary" type="submit">
               Submit
             </Button>
           </Grid>
