@@ -1,17 +1,20 @@
 "use client";
 import * as React from "react";
 import {
-    Box,
-    Container,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    Tooltip,
-  } from "@mui/material";
-  import Sheet from "@mui/joy/Sheet";
-  import { Delete, EditCalendar } from "@mui/icons-material";
+  Box,
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Button,
+} from "@mui/material";
+import Sheet from "@mui/joy/Sheet";
+import { Delete, EditCalendar, Add } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../auth/context"; // Adjust path as needed
 
 function DateNewFormat(
   dateString1: string | Date,
@@ -25,7 +28,6 @@ function DateNewFormat(
   }
 
   let secondDate: Date;
-
   if (typeof dateString2 === "string") {
     secondDate = new Date(Date.parse(dateString2));
   } else {
@@ -65,15 +67,15 @@ interface AppointmentsListProps {
 }
 
 function AppointmentsList({ appointments }: AppointmentsListProps) {
+  const router = useRouter();
+  const { refreshAuth } = useAuth(); // Get refreshAuth function
+
   async function removeAppointment(appointmentId: string) {
     try {
       const response = await fetch(
         `http://localhost:3001/api/appointments/${appointmentId}`,
         {
           method: "DELETE",
-          // body: JSON.stringify({
-          //   appointmentId,
-          // }),
           headers: {
             "Content-Type": "application/json",
           },
@@ -88,14 +90,38 @@ function AppointmentsList({ appointments }: AppointmentsListProps) {
 
       const updatedAppointments = await result.json();
       console.log("Updated Appointments:", updatedAppointments);
-      // setAppointments(updatedAppointments);
+      // setAppointments(updatedAppointments); // Uncomment and implement state management if needed
     } catch (error) {
       console.error("Error deleting appointment:", error);
     }
   }
 
+  const handleAddAppointment = () => {
+    refreshAuth(); // Refresh auth state before navigation
+    router.push("/add-appointments");
+  };
+
   return (
-    <Container className="flex flex-col items-center   justify-center py-4 ">
+    <Container className="flex flex-col items-center justify-center py-4">
+      <Box
+        sx={{
+          mb: 2,
+          display: "flex",
+          justifyContent: "flex-end",
+          width: "100%",
+        }}
+      >
+        <Tooltip title="Add New Appointment">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Add />}
+            onClick={handleAddAppointment}
+          >
+            Add Appointment
+          </Button>
+        </Tooltip>
+      </Box>
       <Box>
         <Sheet sx={{ height: 350, overflow: "auto" }}>
           <Table
@@ -105,7 +131,7 @@ function AppointmentsList({ appointments }: AppointmentsListProps) {
           >
             <TableHead>
               <TableRow>
-                <TableCell>Title </TableCell>
+                <TableCell>Title</TableCell>
                 <TableCell>Description</TableCell>
                 <TableCell>Date</TableCell>
                 <TableCell align="center">Actions</TableCell>
@@ -120,7 +146,6 @@ function AppointmentsList({ appointments }: AppointmentsListProps) {
                   <TableCell component="th" scope="appointment">
                     {appointment.title}
                   </TableCell>
-
                   <TableCell>{appointment.description}</TableCell>
                   <TableCell>
                     {DateNewFormat(appointment.startTime, appointment.endTime)}

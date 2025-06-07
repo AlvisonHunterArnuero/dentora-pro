@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import {
@@ -15,6 +14,7 @@ import {
 import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import SendIcon from "@mui/icons-material/Send";
 import { appointmentSchema } from "./AppointmentSchema";
+import { useAuth } from "../auth/context";
 
 interface User {
   _id: string;
@@ -32,17 +32,15 @@ interface FormData {
 }
 
 const AppointmentForm = () => {
-  const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODQzYzRlMDA2NmIzMGI4MzEwNjlhZjUiLCJuYW1lIjoicGVkcm8ucmFtaXJlekBleGFtcGxlLmNvbSIsImlhdCI6MTc1MDMwOTIyMSwiZXhwIjoxNzUwMzE2NDIxfQ.KcBbGL_Pk_VIt9xVRN1I0MB-ZJ19prcZA0aufksbSCA";
+  const { token, isLoading: authLoading, isAuthenticated, user } = useAuth();
 
-  if (!token) {
-    return <div>Error: Authentication token is missing. Please log in.</div>;
+  // Verificar estado de autenticación
+  if (authLoading) return <div>Loading authentication...</div>;
+  if (!isAuthenticated || !token || !user) {
+    return <div>Error: Authentication required. Please log in.</div>;
   }
 
   const router = useRouter();
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const formik = useFormik<FormData>({
     initialValues: {
@@ -50,7 +48,7 @@ const AppointmentForm = () => {
       date: "",
       startTime: "",
       endTime: "",
-      user: "",
+      user: user._id, // Valor inicial es el ID del usuario autenticado
       description: "",
     },
     validationSchema: appointmentSchema,
@@ -62,7 +60,7 @@ const AppointmentForm = () => {
         const payload = {
           title: values.title,
           user: values.user,
-          startTime: `${values.date}T${values.startTime}: Rheumatology`,
+          startTime: `${values.date}T${values.startTime}:00`,
           endTime: `${values.date}T${values.endTime}:00`,
           description: values.description,
         };
@@ -73,8 +71,7 @@ const AppointmentForm = () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "x-access-token":
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODQzYzRlMDA2NmIzMGI4MzEwNjlhZjUiLCJuYW1lIjoicGVkcm8ucmFtaXJlekBleGFtcGxlLmNvbSIsImlhdCI6MTc1MDMwOTIyMSwiZXhwIjoxNzUwMzE2NDIxfQ.KcBbGL_Pk_VIt9xVRN1I0MB-ZJ19prcZA0aufksbSCA",
+              "x-access-token": token,
             },
             body: JSON.stringify(payload),
           }
@@ -89,52 +86,10 @@ const AppointmentForm = () => {
         router.push("/appointments");
       } catch (err) {
         console.error("Submission error:", err);
-        alert((err as Error).message || "Failed to create appointment.");
+        alert((err as Error).message || "Failed to create appointment");
       }
     },
   });
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        if (!process.env.NEXT_PUBLIC_API_URL) {
-          throw new Error("API URL is not defined");
-        }
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/user`,
-          {
-            headers: {
-              "x-access-token":
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODQzYzRlMDA2NmIzMGI4MzEwNjlhZjUiLCJuYW1lIjoicGVkcm8ucmFtaXJlekBleGFtcGxlLmNvbSIsImlhdCI6MTc1MDMwOTIyMSwiZXhwIjoxNzUwMzE2NDIxfQ.KcBbGL_Pk_VIt9xVRN1I0MB-ZJ19prcZA0aufksbSCA",
-            },
-          }
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch users: ${response.statusText}`);
-        }
-        const data = await response.json();
-        if (!data.allUsers || !Array.isArray(data.allUsers)) {
-          throw new Error("Invalid response format: allUsers is not an array");
-        }
-        const userList = data.allUsers.map((user: any) => ({
-          _id: user._id,
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-        }));
-        setUsers(userList);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-        setError((err as Error).message || "Failed to load users");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, [token]);
-
-  if (loading) return <div>Loading users...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   return (
     <Box
@@ -198,14 +153,14 @@ const AppointmentForm = () => {
               onBlur={formik.handleBlur}
               error={formik.touched.user && Boolean(formik.errors.user)}
             >
-              {users.map((user) => (
-                <MenuItem key={user._id} value={user._id}>
-                  {user.name} ({user.email})
-                </MenuItem>
-              ))}
+              <MenuItem value={user._id}>
+                {user.name} ({user.email})
+              </MenuItem>
             </Select>
             {formik.touched.user && formik.errors.user && (
-              <p className="text-red-500 text-sm">{formik.errors.user}</p>
+              <p className="text-red-500 text-sm">
+                {HAPPENSformik.errors.user}
+              </p>
             )}
           </FormControl>
         </Box>
