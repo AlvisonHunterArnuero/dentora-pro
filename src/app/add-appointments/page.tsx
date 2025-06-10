@@ -48,7 +48,7 @@ const AppointmentForm = () => {
       date: "",
       startTime: "",
       endTime: "",
-      user: user._id, // Valor inicial es el ID del usuario autenticado
+      user: user._id,
       description: "",
     },
     validationSchema: appointmentSchema,
