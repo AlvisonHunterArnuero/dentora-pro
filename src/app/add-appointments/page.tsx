@@ -4,14 +4,16 @@ import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import {
   Box,
-  Grid,
   TextField,
   Button,
   MenuItem,
   Select,
   InputLabel,
   FormControl,
+  Typography,
 } from "@mui/material";
+import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
+import SendIcon from "@mui/icons-material/Send";
 import { appointmentSchema } from "./AppointmentSchema";
 
 interface User {
@@ -30,7 +32,9 @@ interface FormData {
 }
 
 const AppointmentForm = () => {
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODQzYzRlMDA2NmIzMGI4MzEwNjlhZjUiLCJuYW1lIjoicGVkcm8ucmFtaXJlekBleGFtcGxlLmNvbSIsImlhdCI6MTc0OTUzMDU2MCwiZXhwIjoxNzQ5NTM3NzYwfQ.4hY3KctPdrs50Z7XxcDJhPG-PmYODQzz3e1b_tb_NnE";
+  const token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODQzYzRlMDA2NmIzMGI4MzEwNjlhZjUiLCJuYW1lIjoicGVkcm8ucmFtaXJlekBleGFtcGxlLmNvbSIsImlhdCI6MTc1MDMwOTIyMSwiZXhwIjoxNzUwMzE2NDIxfQ.KcBbGL_Pk_VIt9xVRN1I0MB-ZJ19prcZA0aufksbSCA";
+
   if (!token) {
     return <div>Error: Authentication token is missing. Please log in.</div>;
   }
@@ -58,19 +62,23 @@ const AppointmentForm = () => {
         const payload = {
           title: values.title,
           user: values.user,
-          startTime: ${values.date}T${values.startTime}:00,
-          endTime: ${values.date}T${values.endTime}:00,
+          startTime: `${values.date}T${values.startTime}: Rheumatology`,
+          endTime: `${values.date}T${values.endTime}:00`,
           description: values.description,
         };
 
-        const res = await fetch(${process.env.NEXT_PUBLIC_API_URL}/appointments, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": token,
-          },
-          body: JSON.stringify(payload),
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/appointment`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-access-token":
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODQzYzRlMDA2NmIzMGI4MzEwNjlhZjUiLCJuYW1lIjoicGVkcm8ucmFtaXJlekBleGFtcGxlLmNvbSIsImlhdCI6MTc1MDMwOTIyMSwiZXhwIjoxNzUwMzE2NDIxfQ.KcBbGL_Pk_VIt9xVRN1I0MB-ZJ19prcZA0aufksbSCA",
+            },
+            body: JSON.stringify(payload),
+          }
+        );
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -81,7 +89,7 @@ const AppointmentForm = () => {
         router.push("/appointments");
       } catch (err) {
         console.error("Submission error:", err);
-        alert(err.message || "Failed to create appointment.");
+        alert((err as Error).message || "Failed to create appointment.");
       }
     },
   });
@@ -92,14 +100,25 @@ const AppointmentForm = () => {
         if (!process.env.NEXT_PUBLIC_API_URL) {
           throw new Error("API URL is not defined");
         }
-        const response = await fetch(${process.env.NEXT_PUBLIC_API_URL}/user, {
-          headers: { "x-access-token": token },
-        });
-        if (!response.ok) throw new Error("Failed to fetch users");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/user`,
+          {
+            headers: {
+              "x-access-token":
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODQzYzRlMDA2NmIzMGI4MzEwNjlhZjUiLCJuYW1lIjoicGVkcm8ucmFtaXJlekBleGFtcGxlLmNvbSIsImlhdCI6MTc1MDMwOTIyMSwiZXhwIjoxNzUwMzE2NDIxfQ.KcBbGL_Pk_VIt9xVRN1I0MB-ZJ19prcZA0aufksbSCA",
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to fetch users: ${response.statusText}`);
+        }
         const data = await response.json();
+        if (!data.allUsers || !Array.isArray(data.allUsers)) {
+          throw new Error("Invalid response format: allUsers is not an array");
+        }
         const userList = data.allUsers.map((user: any) => ({
           _id: user._id,
-          name: ${user.firstName} ${user.lastName},
+          name: `${user.firstName} ${user.lastName}`,
           email: user.email,
         }));
         setUsers(userList);
@@ -118,14 +137,29 @@ const AppointmentForm = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <Box className="bg-white p-6 rounded shadow-md max-w-3xl mx-auto">
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: 700,
+        mx: "auto",
+        mt: 5,
+        pb: 5,
+        borderRadius: 2,
+        bgcolor: "#fff",
+        color: "#000",
+      }}
+    >
+      <Typography variant="h5" gutterBottom sx={{ textAlign: "center", pt: 4 }}>
+        Please select from the below options:
+      </Typography>
       <form onSubmit={formik.handleSubmit}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+        <Box display="flex" justifyContent="center" gap={2} m={5}>
+          <Box sx={{ width: "50%" }}>
             <TextField
               fullWidth
-              label="Appointment Title"
+              required
               id="title"
+              label="Enter your title!"
               name="title"
               value={formik.values.title}
               onChange={formik.handleChange}
@@ -133,67 +167,72 @@ const AppointmentForm = () => {
               error={formik.touched.title && Boolean(formik.errors.title)}
               helperText={formik.touched.title && formik.errors.title}
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel id="user-label">Select User</InputLabel>
-              <Select
-                labelId="user-label"
-                label="Select User"
-                id="user"
-                name="user"
-                value={formik.values.user}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.user && Boolean(formik.errors.user)}
-                helperText={formik.touched.user && formik.errors.user}
-              >
-                {users.map((user) => (
-                  <MenuItem key={user._id} value={user._id}>
-                    {user.name} ({user.email})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6}>
+          </Box>
+          <Box sx={{ width: "50%" }}>
             <TextField
-              type="date"
-              label="Appointment Date"
               fullWidth
-              InputLabelProps={{ shrink: true }}
+              required
               id="date"
+              type="date"
+              label="Select the date"
               name="date"
               value={formik.values.date}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               error={formik.touched.date && Boolean(formik.errors.date)}
               helperText={formik.touched.date && formik.errors.date}
+              InputLabelProps={{ shrink: true }}
             />
-          </Grid>
-          <Grid item xs={12} sm={3}>
+          </Box>
+        </Box>
+
+        <Box m={5}>
+          <FormControl fullWidth>
+            <InputLabel id="user-label">Select User</InputLabel>
+            <Select
+              labelId="user-label"
+              id="user"
+              name="user"
+              value={formik.values.user}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.user && Boolean(formik.errors.user)}
+            >
+              {users.map((user) => (
+                <MenuItem key={user._id} value={user._id}>
+                  {user.name} ({user.email})
+                </MenuItem>
+              ))}
+            </Select>
+            {formik.touched.user && formik.errors.user && (
+              <p className="text-red-500 text-sm">{formik.errors.user}</p>
+            )}
+          </FormControl>
+        </Box>
+
+        <Box display="flex" justifyContent="center" gap={2} m={5}>
+          <Box sx={{ width: "50%" }}>
+            <label htmlFor="startTime">Enter your Start Time:</label>
             <TextField
               type="time"
-              label="Start Time"
               fullWidth
-              InputLabelProps={{ shrink: true }}
-              inputProps={{ step: 300 }}
               id="startTime"
               name="startTime"
               value={formik.values.startTime}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              error={formik.touched.startTime && Boolean(formik.errors.startTime)}
+              error={
+                formik.touched.startTime && Boolean(formik.errors.startTime)
+              }
               helperText={formik.touched.startTime && formik.errors.startTime}
+              inputProps={{ step: 300 }}
             />
-          </Grid>
-          <Grid item xs={12} sm={3}>
+          </Box>
+          <Box sx={{ width: "50%" }}>
+            <label htmlFor="endTime">Enter your End Time:</label>
             <TextField
               type="time"
-              label="End Time"
               fullWidth
-              InputLabelProps={{ shrink: true }}
-              inputProps={{ step: 300 }}
               id="endTime"
               name="endTime"
               value={formik.values.endTime}
@@ -201,41 +240,50 @@ const AppointmentForm = () => {
               onBlur={formik.handleBlur}
               error={formik.touched.endTime && Boolean(formik.errors.endTime)}
               helperText={formik.touched.endTime && formik.errors.endTime}
+              inputProps={{ step: 300 }}
             />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Description"
-              multiline
-              rows={3}
-              fullWidth
-              id="description"
-              name="description"
-              value={formik.values.description}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.description && Boolean(formik.errors.description)}
-              helperText={formik.touched.description && formik.errors.description}
-            />
-          </Grid>
-          <Grid item xs={12} className="flex justify-between">
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => router.push("/appointments")}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              type="submit"
-              disabled={formik.isSubmitting}
-            >
-              {formik.isSubmitting ? "Creating..." : "Create Appointment"}
-            </Button>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
+
+        <Box m={5}>
+          <TextField
+            fullWidth
+            label="Enter your description!"
+            id="description"
+            multiline
+            rows={4}
+            name="description"
+            value={formik.values.description}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={
+              formik.touched.description && Boolean(formik.errors.description)
+            }
+            helperText={formik.touched.description && formik.errors.description}
+          />
+        </Box>
+
+        <Box display="flex" justifyContent="space-between" m={5}>
+          <Button
+            sx={{ marginLeft: "50px" }}
+            endIcon={<ReplyOutlinedIcon />}
+            variant="contained"
+            color="secondary"
+            onClick={() => router.push("/appointments")}
+          >
+            CANCEL
+          </Button>
+          <Button
+            sx={{ marginRight: "50px" }}
+            endIcon={<SendIcon />}
+            variant="contained"
+            color="primary"
+            type="submit"
+            disabled={formik.isSubmitting}
+          >
+            {formik.isSubmitting ? "Creating..." : "CREATE APPOINTMENT"}
+          </Button>
+        </Box>
       </form>
     </Box>
   );
