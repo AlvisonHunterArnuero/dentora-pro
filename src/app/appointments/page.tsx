@@ -1,36 +1,29 @@
 import AppointmentsList from './AppointmentsList';
 import NavBar from './NavBar';
 import Container from '@mui/material/Container';
-import { cookies } from 'next/headers';
+import { fetchServerAPI } from '@/actions/api.server';
+
+interface Appointment {
+  id: string;
+  title: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+}
 
 export default async function AppointmentsPage() {
-  const cookieStore = await cookies();
-  const jwtToken = cookieStore.get('jwt_token')?.value;
-  let appointments = [];
-  
+  let appointments: Appointment[] = [];
+
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/appointment`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': jwtToken || ''
-        },
-        cache: 'no-store'
-      }
+    const data = await fetchServerAPI<{ appointments: Appointment[] }>(
+      '/appointment',
+      'GET'
     );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to fetch appointments: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    appointments = data.appointments;
-  } catch (error: any) {
-    console.error('Appointments fetch error:', error.message);
+    appointments = data.appointments || [];
+  } catch (error) {
+    console.error('Appointments fetch error:', error instanceof Error ? error.message : 'Unknown error');
   }
+  console.log(appointments)
 
   return (
     <>
