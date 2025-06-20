@@ -8,19 +8,19 @@ import SignUpForm from './SignUpForm';
 import type { SignInFormValues, SignUpFormValues } from './Forms.types';
 import { Box, Paper, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { loginAction } from '@/app/login/server-actions';
+import { loginAction } from '@/actions/auth'
 
 const FormsWrapper: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!loading && isAuthenticated) {
       router.replace('/appointments');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, loading, router]);
 
   const handleSignIn = async (values: SignInFormValues) => {
     setError(null);
