@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useApi } from '@/_hooks/useApi';
 import { logoutAction } from '@/actions/auth';
 
@@ -12,50 +12,76 @@ type AuthContextType = {
   login: (userProfile: UserProfile) => void;
   logout: () => void;
 };
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const defaultContext: AuthContextType = {
+  isAuthenticated: false,
+  loading: false,
+  user: null,
+  login: () => {},
+  logout: () => {},
+};
+const AuthContext = createContext<AuthContextType>(defaultContext);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
-  const { data, error, loading, fetchWithAuth } = useApi<{ isAuthenticated: boolean; user: UserProfile | null }>();
+  const pathname = usePathname();
+  const { loading, fetchWithAuth } = useApi<{
+    isAuthenticated: boolean;
+    user: UserProfile | null;
+  }>();
 
   const fetchUserStatus = useCallback(async () => {
+    // Skips auth check on login page
+    if (pathname === '/') {
+      setIsAuthenticated(false);
+      setUser(null);
+      return;
+    }
+
     try {
-      await fetchWithAuth('/api/auth/token', 'GET');
+      const response = await fetchWithAuth('/api/auth/token', 'GET');
+      setIsAuthenticated(response.isAuthenticated);
+      setUser(response.user);
     } catch (err) {
       console.error('Failed to fetch user status:', err);
+      setIsAuthenticated(false);
+      setUser(null);
     }
-  }, [fetchWithAuth]);
+  }, [fetchWithAuth, pathname]);
 
-  useEffect(() => { fetchUserStatus(); }, [fetchUserStatus]);
   useEffect(() => {
-    if (data) setUser(data.user);
-    else if (error) setUser(null);
-  }, [data, error]);
+    fetchUserStatus();
+  }, [fetchUserStatus]);
 
-  const login = (userProfile: UserProfile) => { setUser(userProfile); };
-  const logout = async () => {
+  const login = useCallback((userProfile: UserProfile) => {
+    setUser(userProfile);
+    setIsAuthenticated(true);
+  }, []);
+
+  const logout = useCallback(async () => {
     try {
       await logoutAction();
       setUser(null);
+      setIsAuthenticated(false);
       router.replace('/');
-      router.refresh();
     } catch (error) {
       console.error('Error during logout:', error);
       setUser(null);
+      setIsAuthenticated(false);
       router.replace('/');
     }
-  };
+  }, [router]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated: !!user, loading, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, loading, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
-  return context;
-};
+  return context; 
+}
