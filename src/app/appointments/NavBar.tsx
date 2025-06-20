@@ -13,7 +13,7 @@ import {
   } from "@mui/material";
   import { HealthAndSafety as HealthAndSafetyIcon, Menu as MenuIcon } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-import { logoutAction } from "@/app/login/server-actions";
+import { logoutAction } from "@/actions/auth";
 
 type Setting = {
   label: string;
