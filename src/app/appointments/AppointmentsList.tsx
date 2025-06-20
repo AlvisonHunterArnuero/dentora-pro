@@ -1,61 +1,23 @@
-"use client";
-import * as React from "react";
+'use client';
+import * as React from 'react';
 import {
-    Box,
-    Container,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    Tooltip,
-  } from "@mui/material";
-  import Sheet from "@mui/joy/Sheet";
-  import { Delete, EditCalendar } from "@mui/icons-material";
-
-function DateNewFormat(
-  dateString1: string | Date,
-  dateString2: string | Date
-): string {
-  let firstDate: Date;
-  if (typeof dateString1 === "string") {
-    firstDate = new Date(Date.parse(dateString1));
-  } else {
-    firstDate = dateString1;
-  }
-
-  let secondDate: Date;
-
-  if (typeof dateString2 === "string") {
-    secondDate = new Date(Date.parse(dateString2));
-  } else {
-    secondDate = dateString2;
-  }
-
-  const result =
-    firstDate.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }) +
-    " " +
-    firstDate.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }) +
-    " to " +
-    secondDate.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-  return result;
-}
+  Box,
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+} from '@mui/material';
+import Sheet from '@mui/joy/Sheet';
+import { DeleteOutline, Edit as EditCalendar } from '@mui/icons-material';
+import { useApi } from '@/_hooks/useApi';
 
 interface Appointment {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   startTime: string | Date;
   endTime: string | Date;
 }
@@ -64,40 +26,65 @@ interface AppointmentsListProps {
   appointments: Appointment[];
 }
 
-function AppointmentsList({ appointments }: AppointmentsListProps) {
-  async function removeAppointment(appointmentId: string) {
-    try {
-      const response = await fetch(
-        `http://localhost:3001/api/appointments/${appointmentId}`,
-        {
-          method: "DELETE",
-          // body: JSON.stringify({
-          //   appointmentId,
-          // }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const result = await response;
-      if (!result.ok) {
-        console.error("Failed to delete appointment:", result.statusText);
-        return;
-      }
-
-      const updatedAppointments = await result.json();
-      console.log("Updated Appointments:", updatedAppointments);
-      // setAppointments(updatedAppointments);
-    } catch (error) {
-      console.error("Error deleting appointment:", error);
-    }
+function DateNewFormat(dateString1: string | Date, dateString2: string | Date): string {
+  let firstDate: Date;
+  if (typeof dateString1 === 'string') {
+    firstDate = new Date(Date.parse(dateString1));
+  } else {
+    firstDate = dateString1;
   }
 
+  let secondDate: Date;
+  if (typeof dateString2 === 'string') {
+    secondDate = new Date(Date.parse(dateString2));
+  } else {
+    secondDate = dateString2;
+  }
+
+  const result =
+    firstDate.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }) +
+    ' ' +
+    firstDate.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }) +
+    ' to ' +
+    secondDate.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+  return result;
+}
+
+export default function AppointmentsList({ appointments }: AppointmentsListProps) {
+  const { fetchWithAuth, data, error, loading } = useApi<{ success: boolean }>();
+  const [localAppointments, setLocalAppointments] = React.useState<Appointment[]>(appointments);
+
+  // Update localAppointments when prop changes (e.g., page refresh)
+  React.useEffect(() => {
+    setLocalAppointments(appointments);
+  }, [appointments]);
+
+  const handleRemoveAppointment = async (appointmentId: string) => {
+    try {
+      // Use fetchWithAuth to delete appointment via API route
+      await fetchWithAuth(`/api/appointments/${appointmentId}`, 'DELETE');
+      // Optimistically update local state
+      setLocalAppointments((prev) => prev.filter((appt) => appt.id !== appointmentId));
+    } catch (err) {
+      console.error('Error deleting appointment:', err);
+    }
+  };
+
   return (
-    <Container className="flex flex-col items-center   justify-center py-4 ">
+    <Container className="flex flex-col items-center justify-center py-4">
       <Box>
-        <Sheet sx={{ height: 350, overflow: "auto" }}>
+        <Sheet sx={{ height: 350, overflow: 'auto' }}>
           <Table
             sx={{ minWidth: 1000 }}
             aria-label="table with sticky header"
@@ -105,41 +92,38 @@ function AppointmentsList({ appointments }: AppointmentsListProps) {
           >
             <TableHead>
               <TableRow>
-                <TableCell>Title </TableCell>
+                <TableCell>Title</TableCell>
                 <TableCell>Description</TableCell>
                 <TableCell>Date</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {appointments.map((appointment) => (
+              {localAppointments.map((appointment) => (
                 <TableRow
                   key={appointment.id}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                  <TableCell component="th" scope="appointment">
+                  <TableCell component="th" scope="row">
                     {appointment.title}
                   </TableCell>
-
-                  <TableCell>{appointment.description}</TableCell>
+                  <TableCell>{appointment.description || 'N/A'}</TableCell>
                   <TableCell>
                     {DateNewFormat(appointment.startTime, appointment.endTime)}
                   </TableCell>
                   <TableCell align="right">
                     <Tooltip title="Edit Appointment">
                       <button className="text-blue-500 hover:underline">
-                        <EditCalendar sx={{ color: "green" }} />
+                        <EditCalendar sx={{ color: 'green' }} />
                       </button>
                     </Tooltip>
                     <Tooltip title="Delete Appointment">
                       <button
                         className="text-red-500 hover:underline ml-4"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          removeAppointment(appointment.id);
-                        }}
+                        onClick={() => handleRemoveAppointment(appointment.id)}
+                        disabled={loading}
                       >
-                        <Delete />
+                        <DeleteOutline />
                       </button>
                     </Tooltip>
                   </TableCell>
@@ -148,9 +132,12 @@ function AppointmentsList({ appointments }: AppointmentsListProps) {
             </TableBody>
           </Table>
         </Sheet>
+        {error && (
+          <Box sx={{ mt: 2, color: 'red' }}>
+            Error deleting appointment: {error}
+          </Box>
+        )}
       </Box>
     </Container>
   );
 }
-
-export default AppointmentsList;
