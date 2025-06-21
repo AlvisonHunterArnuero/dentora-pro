@@ -1,40 +1,34 @@
 "use client";
 import * as React from "react";
-import {
-    AppBar,
-    Avatar,
-    Box,
-    Container,
-    IconButton,
-    Menu,
-    MenuItem,
-    Toolbar,
-    Typography,
-  } from "@mui/material";
-  import { HealthAndSafety as HealthAndSafetyIcon, Menu as MenuIcon } from "@mui/icons-material";
-import { useRouter } from "next/navigation";
-import { logoutAction } from "@/app/login/server-actions";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Menu from "@mui/material/Menu";
+import MenuIcon from "@mui/icons-material/Menu";
+import Container from "@mui/material/Container";
+import Avatar from "@mui/material/Avatar";
 
-type Setting = {
-  label: string;
-  action?: () => void;
-};
+import MenuItem from "@mui/material/MenuItem";
 
-const settings: Setting[] = [
-  { label: "Juan Perez - Admin" },
-  { label: "Logout" }
-];
+import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
+
+//this data will be from the database
+const settings = ["Juan Perez - Admin", "Logout"];
 
 function ResponsiveAppBar() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
-  const router = useRouter();
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
+    null
+  );
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
+    null
+  );
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
-  
+
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -45,27 +39,6 @@ function ResponsiveAppBar() {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
-  };
-
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    try {
-      await logoutAction();
-      router.push("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      setIsLoggingOut(false);
-      handleCloseUserMenu();
-    }
-  };
-
-  const handleMenuItemClick = (setting: Setting) => {
-    if (setting.label === "Logout") {
-      handleLogout();
-    } else {
-      handleCloseUserMenu();
-    }
   };
 
   return (
@@ -85,7 +58,6 @@ function ResponsiveAppBar() {
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
               fontWeight: 700,
               letterSpacing: ".3rem",
               color: "inherit",
@@ -96,10 +68,11 @@ function ResponsiveAppBar() {
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+            {/* <Box sx={{ flexGrow: 1, display: "none" }}> */}
             <IconButton
               sx={{ display: "none" }}
               size="large"
-              aria-label="account of current user"
+              aria-label="Current user's account"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
@@ -122,8 +95,7 @@ function ResponsiveAppBar() {
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
               sx={{ display: { xs: "block", md: "none" } }}
-            >
-            </Menu>
+            ></Menu>
           </Box>
 
           <HealthAndSafetyIcon
@@ -142,7 +114,6 @@ function ResponsiveAppBar() {
               mr: 2,
               display: { xs: "flex", md: "none" },
               flexGrow: 1,
-              fontFamily: "monospace",
               fontWeight: 700,
               letterSpacing: ".3rem",
               color: "inherit",
@@ -151,11 +122,10 @@ function ResponsiveAppBar() {
           >
             Dentora Pro
           </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-          </Box>
+          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}></Box>
           <Box sx={{ flexGrow: 0 }}>
             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-              <Avatar alt="Elvis Gomez" src="/static/images/avatar/2.jpg" />
+              <Avatar alt="Elvis Gomez" src="/avatar.jpg" />
             </IconButton>
 
             <Menu
@@ -175,15 +145,9 @@ function ResponsiveAppBar() {
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem 
-                  key={setting.label} 
-                  onClick={() => handleMenuItemClick(setting)}
-                  disabled={setting.label === "Logout" && isLoggingOut}
-                >
+                <MenuItem key={setting} onClick={handleCloseUserMenu}>
                   <Typography sx={{ textAlign: "center" }}>
-                    {isLoggingOut && setting.label === "Logout" 
-                      ? "Logging out..." 
-                      : setting.label}
+                    {setting}
                   </Typography>
                 </MenuItem>
               ))}
@@ -194,5 +158,4 @@ function ResponsiveAppBar() {
     </AppBar>
   );
 }
-
 export default ResponsiveAppBar;
