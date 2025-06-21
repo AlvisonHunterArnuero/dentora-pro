@@ -142,7 +142,26 @@ function AppointmentsList({ appointmentsList }: AppointmentsListProps) {
 
   const headers = ["Title", "Description", "Date", "Status", "Actions"];
   return (
-    <Container className="flex flex-col items-center   justify-center py-4 ">
+    <Container className="flex flex-col items-center justify-center py-4">
+      <Box
+        sx={{
+          mb: 2,
+          display: "flex",
+          justifyContent: "flex-end",
+          width: "100%",
+        }}
+      >
+        <Tooltip title="Add New Appointment">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Add />}
+            onClick={handleAddAppointment}
+          >
+            Add Appointment
+          </Button>
+        </Tooltip>
+      </Box>
       <Box>
         <Sheet sx={{ height: 450, overflow: "auto" }}>
           <Table

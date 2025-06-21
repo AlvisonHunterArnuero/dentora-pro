@@ -1,15 +1,15 @@
-'use client';
-import React from 'react';
-import { Formik, Form } from 'formik';
-import { SignInFormProps, SignInFormValues } from './Forms.types';
-import { SignInSchema } from './ValidationSchemas';
-import { Box, Button } from '@mui/material';
-import { CustomTextField } from './CustomTextField';
+"use client";
+import React from "react";
+import { Formik, Form } from "formik";
+import { SignInFormProps, SignInFormValues } from "./Forms.types";
+import { SignInSchema } from "./ValidationSchemas";
+import { Box, Button } from "@mui/material";
+import { CustomTextField } from "./CustomTextField";
 
 const SignInForm: React.FC<SignInFormProps> = ({ onSubmit, isSubmitting }) => {
   const initialValues: SignInFormValues = {
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   };
 
   return (
@@ -24,8 +24,8 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSubmit, isSubmitting }) => {
       <Form className="w-screen max-w-lg p-4 min-h-96">
         <Box
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
+            display: "flex",
+            flexDirection: "column",
             gap: 3,
             p: 3,
           }}
@@ -44,13 +44,13 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSubmit, isSubmitting }) => {
             sx={{
               py: 2,
               mt: 2,
-              backgroundColor: 'primary.main',
-              '&:hover': {
-                backgroundColor: 'primary.dark',
+              backgroundColor: "primary.main",
+              "&:hover": {
+                backgroundColor: "primary.dark",
               },
             }}
           >
-            {isSubmitting ? 'Signing In...' : 'Sign In'}
+            {isSubmitting ? "Signing In..." : "Sign In"}
           </Button>
         </Box>
       </Form>
