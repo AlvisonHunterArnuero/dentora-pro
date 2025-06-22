@@ -81,51 +81,59 @@ function FormEditAppointment({ appointment }: AppointmentProp) {
     const maxTime = "17:00";
     const msg = "You cannot set this time for";
 
-    if (
-      value < minTime ||
-      value > maxTime ||
-      (value >= lunchStart && value <= lunchEnd)
-    ) {
-      if (field === "startTime") {
-        setErrorStartTime(`${msg} ${field}`);
-      } else {
-        setErrorEndTime(`${msg} ${field}`);
-        setStatusSubmit(true);
-      }
-    } else {
-      if (field === "endTime" && form.startTime && value < form.startTime) {
-        setErrorEndTime("the end time cannot be less than start time");
-        setStatusSubmit(true);
-      } else {
-        setErrorEndTime("");
-        setStatusSubmit(false);
-      }
 
-      if (field === "startTime" && form.endTime && value > form.endTime) {
-        setErrorStartTime("the start time cannot be greater than end time");
+    if (field === "startTime") {
+      if (
+        value < minTime ||
+        value > maxTime ||
+        (value >= lunchStart && value <= lunchEnd)
+      ) {
+        setErrorStartTime(`${msg} ${field}`);
         setStatusSubmit(true);
       } else {
-        setErrorStartTime("");
-        setStatusSubmit(false);
+        if (form.endTime && value > form.endTime) {
+          setErrorStartTime("The start time cannot be greater than end time");
+          setStatusSubmit(true);
+        } else {
+          setErrorStartTime("");
+          setStatusSubmit(false);
+          const appointmentsFetched = await fetchAppointments();
+          const appointments = appointmentsFetched.appointments || [];
+          const appointmentFinded = appointments.find(
+            (a: Appointment) =>
+              new Date(a.startTime).toISOString().split("T")[0] == form.date &&
+              new Date(a.startTime).toTimeString().slice(0, 5) == value
+          );
+          if (appointmentFinded) {
+            showMessage(
+              "An appointment already exists on the selected date and time"
+            );
+            setSeverity("warning");
+            setStatusSubmit(true);
+          } else {
+            setStatusSubmit(false);
+          }
+        }
       }
     }
 
-    if (field === "startTime") {
-      const appointmentsFetched = await fetchAppointments();
-      const appointments = appointmentsFetched.appointments || [];
-      const appointmentFinded = appointments.find(
-        (a: Appointment) =>
-          new Date(a.startTime).toISOString().split("T")[0] == form.date &&
-          new Date(a.startTime).toTimeString().slice(0, 5) == value
-      );
-      if (appointmentFinded) {
-        showMessage(
-          "An appointment already exists on the selected date and time"
-        );
-        setSeverity("warning");
+    if (field === "endTime") {
+      if (
+        value < minTime ||
+        value > maxTime ||
+        (value >= lunchStart && value <= lunchEnd)
+      ) {
+        setErrorEndTime(`${msg} ${field}`);
         setStatusSubmit(true);
       } else {
-        setStatusSubmit(false);
+        if (form.startTime && value < form.startTime) {
+          setErrorEndTime("The end time cannot be less than start time");
+          setStatusSubmit(true);
+        } else {
+          setErrorEndTime("");
+          setErrorStartTime("");
+          setStatusSubmit(false);
+        }
       }
     }
   };
@@ -180,8 +188,9 @@ function FormEditAppointment({ appointment }: AppointmentProp) {
         pb: 5,
         border: "solid 1px gray",
         borderRadius: 2,
-        bgcolor: "#fff",
-        color: "#000",
+        bgcolor: "#ffffee",
+        color: "primary",
+
       }}
     >
       <>

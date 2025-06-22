@@ -67,6 +67,7 @@ function AppointmentsList({ appointmentsList }: AppointmentsListProps) {
   const [appointments, setAppointments] =
     useState<Appointment[]>(appointmentsList);
 
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -296,6 +297,7 @@ function AppointmentsList({ appointmentsList }: AppointmentsListProps) {
               </TableRow>
             </TableFooter>
           </Table>
+
         </Sheet>
       </Box>
       <Dialog

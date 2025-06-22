@@ -3,6 +3,7 @@ import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
+
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -49,6 +50,7 @@ export default function ResponsiveAppBar() {
       setIsLoggingOut(false);
     }
   };
+
 
   return (
     <AppBar position="fixed">
@@ -100,6 +102,7 @@ export default function ResponsiveAppBar() {
           >
             Dentora Pro
           </Typography>
+
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             <Typography
               variant="h6"

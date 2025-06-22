@@ -1,3 +1,4 @@
+
 import React from "react";
 import AppointmentsList from "./AppointmentsList";
 import NavBar from "./NavBar";
@@ -19,6 +20,7 @@ export default async function page() {
         appointment.user._id === userData.id
     );
   }
+
 
   return (
     <>
