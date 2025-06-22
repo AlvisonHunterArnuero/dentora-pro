@@ -1,5 +1,5 @@
 import { CheckCircle, WarningAmber, Cancel } from "@mui/icons-material";
-import { AppointmentStatus } from "../models/appointments";
+import { AppointmentStatus } from "../models/appointments.model";
 
 export function formatDateRange(
   start: string | Date,

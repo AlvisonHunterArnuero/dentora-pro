@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import {
@@ -14,13 +15,9 @@ import {
 import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import SendIcon from "@mui/icons-material/Send";
 import { appointmentSchema } from "./AppointmentSchema";
-import { useAuth } from "../auth/context";
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-}
+import { fetchUsers, getEmailFromToken } from "../services/user.service";
+import { useEffect, useState } from "react";
+import { createAppointmentServer } from "../add-appointments/actions";
 
 interface FormData {
   title: string;
@@ -31,16 +28,30 @@ interface FormData {
   description: string;
 }
 
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+}
+
 const AppointmentForm = () => {
-  const { token, isLoading: authLoading, isAuthenticated, user } = useAuth();
-
-  // Verificar estado de autenticación
-  if (authLoading) return <div>Loading authentication...</div>;
-  if (!isAuthenticated || !token || !user) {
-    return <div>Error: Authentication required. Please log in.</div>;
-  }
-
+  const [loggedUser, setLoggedUser] = useState<User | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const getLoggedUser = async () => {
+      try {
+        const email = await getEmailFromToken();
+        const users = await fetchUsers();
+        const allUsers = users.allUsers || users;
+        const user = allUsers.find((u: User) => u.email === email);
+        setLoggedUser(user ?? null);
+      } catch (error) {
+        console.error("Error fetching logged user:", error);
+      }
+    };
+    getLoggedUser();
+  }, []);
 
   const formik = useFormik<FormData>({
     initialValues: {
@@ -48,15 +59,12 @@ const AppointmentForm = () => {
       date: "",
       startTime: "",
       endTime: "",
-      user: user._id,
+      user: "",
       description: "",
     },
     validationSchema: appointmentSchema,
     onSubmit: async (values) => {
       try {
-        if (!process.env.NEXT_PUBLIC_API_URL) {
-          throw new Error("API URL is not defined");
-        }
         const payload = {
           title: values.title,
           user: values.user,
@@ -65,21 +73,10 @@ const AppointmentForm = () => {
           description: values.description,
         };
 
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/appointment`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-access-token": token,
-            },
-            body: JSON.stringify(payload),
-          }
-        );
+        const result = await createAppointmentServer(payload);
 
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || "Error creating appointment");
+        if (!result.ok) {
+          throw new Error(result.message || "Error creating appointment");
         }
 
         alert("Appointment created successfully!");
@@ -90,6 +87,12 @@ const AppointmentForm = () => {
       }
     },
   });
+
+  useEffect(() => {
+    if (loggedUser) {
+      formik.setFieldValue("user", loggedUser._id);
+    }
+  }, [loggedUser]);
 
   return (
     <Box
@@ -153,15 +156,12 @@ const AppointmentForm = () => {
               onBlur={formik.handleBlur}
               error={formik.touched.user && Boolean(formik.errors.user)}
             >
-              <MenuItem value={user._id}>
-                {user.name} ({user.email})
-              </MenuItem>
+              {loggedUser && (
+                <MenuItem value={loggedUser._id}>
+                  {loggedUser.name} ({loggedUser.email})
+                </MenuItem>
+              )}
             </Select>
-            {formik.touched.user && formik.errors.user && (
-              <p className="text-red-500 text-sm">
-                {HAPPENSformik.errors.user}
-              </p>
-            )}
           </FormControl>
         </Box>
 

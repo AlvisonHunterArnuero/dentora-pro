@@ -7,7 +7,6 @@ import { styled } from "@mui/material/styles";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Snackbar, { SnackbarCloseReason } from "@mui/material/Snackbar";
-
 import {
   Box,
   Tooltip,
@@ -25,13 +24,20 @@ import {
   useTheme,
   Alert,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
 import Container from "@mui/material/Container";
 import Sheet from "@mui/joy/Sheet";
 import EditCalendar from "@mui/icons-material/EditCalendar";
 import Delete from "@mui/icons-material/Delete";
-//import Swal from "sweetalert2";
-import { fetchAppointments, deleteAppointment } from "../services/appointments";
-import { Appointment, AppointmentsListProps } from "../models/appointments";
+import Add from "@mui/icons-material/Add";
+import {
+  fetchAppointments,
+  deleteAppointment,
+} from "../services/appointments.service";
+import {
+  Appointment,
+  AppointmentsListProps,
+} from "../models/appointments.model";
 import { formatDateRange, getAppointmentStatus } from "../utils/dateHelpers";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -46,6 +52,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 function AppointmentsList({ appointmentsList }: AppointmentsListProps) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   const handleClick = () => {
     setOpen(true);
@@ -58,12 +65,11 @@ function AppointmentsList({ appointmentsList }: AppointmentsListProps) {
     if (reason === "clickaway") {
       return;
     }
-
     setOpen(false);
   };
+
   const [appointments, setAppointments] =
     useState<Appointment[]>(appointmentsList);
-
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -102,13 +108,11 @@ function AppointmentsList({ appointmentsList }: AppointmentsListProps) {
 
   async function removeAppointment(appointmentId: string) {
     if (!appointmentId) return;
-
     try {
       await deleteAppointment(appointmentId);
       const updatedAppointmentsFetched = await fetchAppointments();
       const updatedAppointments = updatedAppointmentsFetched.appointments || [];
       setAppointments(updatedAppointments);
-
       setSnackbarMessage("The item has been deleted");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
@@ -120,10 +124,8 @@ function AppointmentsList({ appointmentsList }: AppointmentsListProps) {
   }
 
   const [openModal, setOpenModal] = useState(false);
-
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
-
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
 
@@ -138,6 +140,10 @@ function AppointmentsList({ appointmentsList }: AppointmentsListProps) {
   const handleConfirm = (appointmentId: string) => {
     removeAppointment(appointmentId);
     setOpenModal(false);
+  };
+
+  const handleAddAppointment = () => {
+    router.push("/add-appointments");
   };
 
   const headers = ["Title", "Description", "Date", "Status", "Actions"];
@@ -233,7 +239,6 @@ function AppointmentsList({ appointmentsList }: AppointmentsListProps) {
                             <EditCalendar />
                           </Button>
                         </Tooltip>
-
                         <Tooltip title="Delete Appointment">
                           <Button
                             onClick={() =>
@@ -279,7 +284,6 @@ function AppointmentsList({ appointmentsList }: AppointmentsListProps) {
                   }}
                   onPageChange={handleChangePage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
-                  // ActionsComponent={TablePaginationActions}
                 />
               </TableRow>
             </TableFooter>
