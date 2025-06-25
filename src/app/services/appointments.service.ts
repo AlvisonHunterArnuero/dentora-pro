@@ -6,8 +6,8 @@ import { Appointment } from "../models/appointments.model";
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export async function fetchAppointments() {
-  const cookieStore = await cookies(); // Esperamos a que cookies() se resuelva
-  const jwtToken = cookieStore.get("jwt_token")?.value; // Ahora podemos usar .get()
+  const cookieStore = await cookies();
+  const jwtToken = cookieStore.get("jwt_token")?.value;
   const response = await fetch(`${BASE_URL}/appointment`, {
     method: "GET",
     headers: {
