@@ -6,7 +6,7 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  Container,
+  Container
 } from '@mui/material';
 import FormsWrapper from './components/Forms/FormsWrapper';
 
@@ -28,7 +28,7 @@ export default function Home() {
             className="transition-all duration-500 ease-in-out object-cover lg:opacity-100 md:opacity-50 sm:opacity-30 opacity-0 lg:translate-x-0 md:translate-x-[-50%] sm:translate-x-[-100%]"
             style={{
               maxWidth: '100%',
-              maxHeight: '100%',
+              maxHeight: '100%'
             }}
           />
         </Box>
@@ -42,14 +42,14 @@ export default function Home() {
           sx={{
             backgroundImage: {
               sm: 'url(/dentora-pro-login-screen-02.png)',
-              md: 'none',
+              md: 'none'
             },
             backgroundColor: {
               sm: 'transparent',
-              md: 'white',
+              md: 'white'
             },
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundPosition: 'center'
           }}
         >
           <FormsWrapper />
@@ -73,11 +73,11 @@ export default function Home() {
               fontFamily: 'var(--font-inter-ui)',
               fontSize: '0.875rem',
               fontWeight: 400,
-              color: '#fff',
+              color: '#fff'
             }}
           >
-            Copyright © {new Date().getFullYear()} Dentora Pro.
-            Proudly created by
+            Copyright © {new Date().getFullYear()} Dentora Pro. Proudly created
+            by
             <a
               className="pl- flex items-center gap-2 hover:text-[#3CA687] hover:underline hover:underline-offset-4"
               href="https://codecrafterslabs.com/"
