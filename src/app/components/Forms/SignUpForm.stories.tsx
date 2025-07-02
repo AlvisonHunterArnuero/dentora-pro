@@ -49,7 +49,7 @@ export const SuccessfulSubmission: Story = {
     );
 
     await userEvent.type(
-      canvas.getByLabelText(/Phone Number/i),
+      canvas.getByLabelText(/Phone/i),
       '2345 9870',
       { delay: 10 }
     );
@@ -104,7 +104,7 @@ export const ShowsValidationErrors: Story = {
       ).toBeInTheDocument();
 
       expect(
-        canvas.getByText('Phone Numer is Required')
+        canvas.getByText('Phone number is Required')
       ).toBeInTheDocument();
 
       expect(
@@ -135,16 +135,16 @@ export const InvalidEmailFormat: Story = {
       canvas.getByLabelText(/Last Name/i),
       'Hunter Arnuero',
       { delay: 10 }
-    ); 
+    );
 
-     await userEvent.type(
+    await userEvent.type(
       canvas.getByLabelText(/Address/i),
-      'wrong addresss',
+      'fake addresss',
       { delay: 10 }
     );
 
     await userEvent.type(
-      canvas.getByLabelText(/Phone Number/i),
+      canvas.getByLabelText(/Phone/i),
       '90873465',
       { delay: 10 }
     );
@@ -190,6 +190,18 @@ export const PasswordsMismatch: Story = {
     await userEvent.type(
       canvas.getByLabelText(/Last Name/i),
       'Hunter Acevedo',
+      { delay: 10 }
+    );
+
+    await userEvent.type(
+      canvas.getByLabelText(/Address/i),
+      'fake addresss',
+      { delay: 10 }
+    );
+
+    await userEvent.type(
+      canvas.getByLabelText(/Phone/i),
+      '90873465',
       { delay: 10 }
     );
 

@@ -1,27 +1,26 @@
-import React from "react";
-import { Formik, Form } from "formik";
-import { SignUpFormProps, SignUpFormValues } from "./Forms.types";
-import { SignUpSchema } from "./ValidationSchemas";
-import { Button, Box, Stack } from "@mui/material";
-import { CustomTextField } from "./CustomTextField";
+import React from 'react';
+import { Formik, Form } from 'formik';
+import { SignUpFormProps, SignUpFormValues } from './Forms.types';
+import { SignUpSchema } from './ValidationSchemas';
+import { Button, Box, Stack } from '@mui/material';
+import { CustomTextField } from './CustomTextField';
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
-
   const initialValues: SignUpFormValues = {
-    firstName: "",
-    lastName: "",
-    address: "",
-    phone: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    firstName: '',
+    lastName: '',
+    address: '',
+    phone: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   };
 
   const handleSubmit = async (values: SignUpFormValues) => {
     try {
       onSubmit(values);
     } catch (error) {
-      console.error("SignUp failed:", error);
+      console.error('SignUp failed:', error);
     }
   };
 
@@ -35,8 +34,8 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
         <Form className="w-screen max-w-lg p-4 min-h-96">
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
+              display: 'flex',
+              flexDirection: 'column',
               gap: 3,
               p: 3,
             }}
@@ -47,11 +46,27 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
                 label="First Name"
                 type="text"
               />
-              <CustomTextField name="lastName" label="Last Name" type="text" />
+              <CustomTextField
+                name="lastName"
+                label="Last Name"
+                type="text"
+              />
             </Stack>
-            <CustomTextField name="address" label="Address" type="text" />
-            <CustomTextField name="phone" label="Phone" type="text" />
-            <CustomTextField name="email" label="Email" type="email" />
+            <CustomTextField
+              name="address"
+              label="Address"
+              type="text"
+            />
+            <CustomTextField
+              name="phone"
+              label="Phone"
+              type="phone"
+            />
+            <CustomTextField
+              name="email"
+              label="Email"
+              type="email"
+            />
             <CustomTextField
               name="password"
               label="Enter Password"
@@ -69,9 +84,9 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
               sx={{
                 py: 2,
                 mt: 2,
-                backgroundColor: "primary.main",
-                "&:hover": {
-                  backgroundColor: "primary.dark",
+                backgroundColor: 'primary.main',
+                '&:hover': {
+                  backgroundColor: 'primary.dark',
                 },
               }}
             >
